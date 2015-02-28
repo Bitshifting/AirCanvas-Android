@@ -4,7 +4,7 @@
 /.idea/libraries
 .DS_Store
 /build
-app.iml
+app/app.iml
 
 # Built application files
 *.apk
