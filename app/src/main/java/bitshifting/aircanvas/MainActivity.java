@@ -14,6 +14,8 @@ import com.firebase.client.ValueEventListener;
 import com.google.vrtoolkit.cardboard.CardboardActivity;
 import com.google.vrtoolkit.cardboard.CardboardView;
 
+import org.opencv.android.OpenCVLoader;
+
 
 public class MainActivity extends CardboardActivity {
 
@@ -29,6 +31,8 @@ public class MainActivity extends CardboardActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (!OpenCVLoader.initDebug()) {}
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
