@@ -53,10 +53,10 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener 
     private short drawOrder2[] = {2, 0, 3, 3, 0, 1}; // order to draw vertices
 
     static float textureVertices[] = {
-            0.0f, 1.0f,  // A. left-bottom
-            1.0f, 1.0f,  // B. right-bottom
-            0.0f, 0.0f,  // C. left-top
-            1.0f, 0.0f   // D. right-top
+            0.0f, 1.0f,  -Float.MAX_VALUE,  // A. left-bottom
+            1.0f, 1.0f,  -Float.MAX_VALUE, // B. right-bottom
+            0.0f, 0.0f,  -Float.MAX_VALUE, // C. left-top
+            1.0f, 0.0f   -Float.MAX_VALUE // D. right-top
     };
 
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
@@ -79,7 +79,6 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener 
     //called every frame (update)
     public void onNewFrame(HeadTransform headTransform) {
         float[] mtx = new float[16];
-        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
         surface.updateTexImage();
         surface.getTransformMatrix(mtx);
     }
@@ -95,7 +94,7 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener 
 
         mPositionHandle = GLES30.glGetAttribLocation(mProgram, "position");
         GLES30.glEnableVertexAttribArray(mPositionHandle);
-        GLES30.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES30.GL_FLOAT,
+        GLES30.glVertexAttribPointer(mPositionHandle, 3, GLES30.GL_FLOAT,
                 false,vertexStride, vertexBuffer);
 
 
