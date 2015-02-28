@@ -1,21 +1,40 @@
 package bitshifting.aircanvas;
 
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.vrtoolkit.cardboard.CardboardActivity;
+import com.google.vrtoolkit.cardboard.CardboardView;
 
-public class MainActivity extends ActionBarActivity {
+
+public class MainActivity extends CardboardActivity {
+
+    private static final String TAG = "MainActivity";
+
+    //set renderer to the main renderer class
+    MainRenderer renderer;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //get google cardboard
+        CardboardView cardboardView = (CardboardView) findViewById(R.id.cardboard_view);
+
+        //set renderer
+        renderer = new MainRenderer();
+        cardboardView.setRenderer(renderer);
+        setCardboardView(cardboardView);
     }
 
+    //called when button is pressed
+    @Override
+    public void onCardboardTrigger() {
+        renderer.onCardboardTrigger();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -37,16 +56,5 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    /** Check if this device has a camera */
-    private boolean checkCameraHardware(Context context) {
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
-            // this device has a camera
-            return true;
-        } else {
-            // no camera on this device
-            return false;
-        }
     }
 }
