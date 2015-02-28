@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.util.Hashtable;
 import java.util.Map;
 
+import bitshifting.aircanvas.MainRenderer;
+
 /**
  * Created by Kenneth on 2/28/15.
  */
@@ -18,7 +20,7 @@ public class ShaderManager {
 
     public final String TAG = "ShaderManager";
 
-    private Map<String, Integer> listOfShaders;
+    private Hashtable<String, Integer> listOfShaders;
 
     public Context context;
 
@@ -37,7 +39,6 @@ public class ShaderManager {
         GLES30.glAttachShader(program, vertShader);
         GLES30.glAttachShader(program, fragShader);
         GLES30.glLinkProgram(program);
-        GLES30.glUseProgram(program);
 
         listOfShaders.put(key, program);
 
