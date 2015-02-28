@@ -43,10 +43,15 @@ public class MainRenderer implements CardboardView.StereoRenderer {
 
     Cube testCube;
 
+    //Camera renderer
+    CardboardCamera cameraRenderer;
+
     //called every frame (update)
     @Override
     public void onNewFrame(HeadTransform headTransform) {
         Matrix.setLookAtM(camera, 0, 0.0f, 0.0f, CAMERA_Z, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+
+        cameraRenderer.onNewFrame(headTransform);
     }
 
     //render function
@@ -54,14 +59,18 @@ public class MainRenderer implements CardboardView.StereoRenderer {
     public void onDrawEye(Eye eye) {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
+        cameraRenderer.onDrawEye(eye);
         projectionMatrix = eye.getPerspective(Z_NEAR, Z_FAR);
         Matrix.multiplyMM(viewMatrix, 0, eye.getEyeView(), 0, camera, 0);
         testCube.render(projectionMatrix, viewMatrix);
+
+
     }
 
     //called when button is pressed
     public void onCardboardTrigger() {
 
+        cameraRenderer.onCardboardTrigger();
     }
 
 
@@ -69,16 +78,19 @@ public class MainRenderer implements CardboardView.StereoRenderer {
     @Override
     public void onFinishFrame(Viewport viewport) {
 
+        cameraRenderer.onFinishFrame(viewport);
     }
 
     @Override
     public void onRendererShutdown() {
         Log.i(TAG, "onRendererShutdown");
+        cameraRenderer.onRendererShutdown();
     }
 
     @Override
     public void onSurfaceChanged(int width, int height) {
         Log.i(TAG, "onSurfaceChanged");
+        cameraRenderer.onSurfaceChanged(width, height);
     }
 
     // called when world starts
@@ -102,18 +114,24 @@ public class MainRenderer implements CardboardView.StereoRenderer {
         float[] color = {1, 0, 0};
         testCube = new Cube(pos, color, 5.f, shaderManager.getShader("NoLight"));
 
+        cameraRenderer.onSurfaceCreated(config);
+
     }
 
     private void loadShaders() {
         shaderManager.addShader(R.raw.nolightvert, R.raw.nolightfrag, "NoLight");
+        shaderManager.addShader(R.raw.texturevert, R.raw.texturefrag, "Texture");
     }
 
     //constructor
-    public MainRenderer(Context ctx) {
+    public MainRenderer(Context ctx, CardboardView cardboardView) {
         context = ctx;
-        shaderManager = new ShaderManager(ctx);
+        shaderManager = ShaderManager.getInstance();
+        shaderManager.setContext(ctx);
         viewMatrix = new float[16];
         camera = new float[16];
+
+        cameraRenderer = new CardboardCamera(cardboardView, ctx);
     }
 
     public static void checkGLError(String label) {

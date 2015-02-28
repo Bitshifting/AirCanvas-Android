@@ -116,7 +116,6 @@ public class Cube {
         //set up attribs
         GLES30.glVertexAttribPointer(verticesID, 3, GLES30.GL_FLOAT,
                 false, 0, verticesBuff);
-        MainRenderer.checkGLError("RENDER");
 
 //        GLES30.glVertexAttribPointer(normalID, 3, GLES30.GL_FLOAT,
 //                false, 0, normalsBuff);

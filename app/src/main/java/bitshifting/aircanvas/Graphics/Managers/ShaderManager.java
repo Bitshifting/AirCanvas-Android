@@ -22,11 +22,24 @@ public class ShaderManager {
 
     private Hashtable<String, Integer> listOfShaders;
 
+    static ShaderManager instance = null;
+
     public Context context;
 
-    public ShaderManager(Context ctx) {
+    protected ShaderManager() {
         listOfShaders = new Hashtable<>();
-        context = ctx;
+    }
+
+    public static ShaderManager getInstance() {
+        if(instance == null) {
+            instance = new ShaderManager();
+        }
+
+        return instance;
+    }
+
+    public void setContext(Context ctx) {
+        this.context = ctx;
     }
 
     //add shader
