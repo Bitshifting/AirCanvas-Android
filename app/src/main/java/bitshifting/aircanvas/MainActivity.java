@@ -16,8 +16,7 @@ public class MainActivity extends CardboardActivity {
     private static final String TAG = "MainActivity";
 
     //set renderer to the main renderer class
-    MainRenderer renderer;
-
+    CardboardCamera renderer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +27,13 @@ public class MainActivity extends CardboardActivity {
         CardboardView cardboardView = (CardboardView) findViewById(R.id.cardboard_view);
 
         //set renderer
-        renderer = new MainRenderer();
+        renderer = new CardboardCamera(cardboardView);
         cardboardView.setRenderer(renderer);
         setCardboardView(cardboardView);
+
+        if (!checkCameraHardware(getApplicationContext())) {
+            return;
+        }
     }
 
     //called when button is pressed

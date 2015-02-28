@@ -1,6 +1,7 @@
 package bitshifting.aircanvas;
 
 import android.app.Activity;
+import android.hardware.camera2.CameraDevice;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -105,5 +106,4 @@ public class CameraFragment extends Fragment {
         // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);
     }
-
 }
