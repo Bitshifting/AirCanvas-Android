@@ -1,17 +1,73 @@
 package bitshifting.aircanvas;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.vrtoolkit.cardboard.CardboardActivity;
+import com.google.vrtoolkit.cardboard.CardboardView;
+import com.google.vrtoolkit.cardboard.Eye;
+import com.google.vrtoolkit.cardboard.HeadTransform;
+import com.google.vrtoolkit.cardboard.Viewport;
 
-public class MainActivity extends ActionBarActivity {
+import javax.microedition.khronos.egl.EGLConfig;
+
+
+public class MainActivity extends CardboardActivity implements CardboardView.StereoRenderer {
+
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //get google cardboard
+        CardboardView cardboardView = (CardboardView) findViewById(R.id.cardboard_view);
+
+        //set renderer
+        cardboardView.setRenderer(this);
+        setCardboardView(cardboardView);
+    }
+
+    //called every frame
+    @Override
+    public void onNewFrame(HeadTransform headTransform) {
+
+    }
+
+    //render function
+    @Override
+    public void onDrawEye(Eye eye) {
+
+    }
+
+    //called when button is pressed
+    @Override
+    public void onCardboardTrigger() {
+
+    }
+
+    @Override
+    public void onFinishFrame(Viewport viewport) {
+
+    }
+
+    @Override
+    public void onRendererShutdown() {
+        Log.i(TAG, "onRendererShutdown");
+    }
+
+    @Override
+    public void onSurfaceChanged(int width, int height) {
+        Log.i(TAG, "onSurfaceChanged");
+    }
+
+    // called when world starts
+    @Override
+    public void onSurfaceCreated(EGLConfig config) {
+
     }
 
 
