@@ -18,7 +18,7 @@ public class ShaderManager {
 
     public final String TAG = "ShaderManager";
 
-    public Map<String, Integer> listOfShaders;
+    private Map<String, Integer> listOfShaders;
 
     public Context context;
 
@@ -52,6 +52,10 @@ public class ShaderManager {
         }
 
         return false;
+    }
+
+    public int getShader(String key) {
+        return listOfShaders.get(key);
     }
 
     private int loadGLShader(int type, int resId) {

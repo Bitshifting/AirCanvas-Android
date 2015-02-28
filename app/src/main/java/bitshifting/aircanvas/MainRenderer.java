@@ -11,6 +11,7 @@ import com.google.vrtoolkit.cardboard.Viewport;
 
 import javax.microedition.khronos.egl.EGLConfig;
 
+import bitshifting.aircanvas.Graphics.Managers.DrawHelper;
 import bitshifting.aircanvas.Graphics.Managers.ShaderManager;
 
 /**
@@ -66,13 +67,20 @@ public class MainRenderer implements CardboardView.StereoRenderer {
         //set a clear color
         GLES30.glClearColor(0.1f, 0.1f, 0.1f, 0.f);
 
-        //set depth asdfasdfasdf
+        //set depth test
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
 
-        //set alpha asdfasdfasdf
+        //set alpha test
         GLES30.glEnable(GLES30.GL_BLEND);
         GLES30.glBlendFunc (GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
 
+        //create a cube a a bit aways
+
+
+    }
+
+    private void loadShaders() {
+        shaderManager.addShader(R.raw.NoLightVert, R.raw.NoLightFrag, "NoLight");
     }
 
     //constructor
