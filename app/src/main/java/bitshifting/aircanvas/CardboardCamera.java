@@ -1,6 +1,7 @@
 package bitshifting.aircanvas;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES30;
@@ -22,7 +23,6 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import bitshifting.aircanvas.Graphics.Managers.ShaderManager;
-import bitshifting.aircanvas.Picture.PictureTaken;
 
 /**
  * Created by Kenneth on 2/28/15.
@@ -240,12 +240,13 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener,
     public void onPreviewFrame(byte[] data, Camera camera) {
 
         count++;
-        if(count == 60) {
+        if(count == 10) {
             //transforms NV21 pixel data into RGB pixels
             decodeYUV420SP(pixels, data, previewSize.width,  previewSize.height);
             //Outuput the value of the top left pixel in the preview to LogCat
             Log.i("Pixels", "The top right pixel has the following RGB (hexadecimal) values:"
                     +Integer.toHexString(pixels[0]));
+
             count = 0;
         }
     }
