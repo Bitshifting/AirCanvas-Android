@@ -19,7 +19,7 @@ public class MainRenderer implements CardboardView.StereoRenderer {
 
     public static final String TAG = "MainRenderer";
 
-    //called every frame
+    //called every frame (update)
     @Override
     public void onNewFrame(HeadTransform headTransform) {
 
@@ -36,6 +36,8 @@ public class MainRenderer implements CardboardView.StereoRenderer {
 
     }
 
+
+    //called when frame has finished
     @Override
     public void onFinishFrame(Viewport viewport) {
 
@@ -56,7 +58,7 @@ public class MainRenderer implements CardboardView.StereoRenderer {
     public void onSurfaceCreated(EGLConfig config) {
 
         //set a clear color
-        GLES30.glClearColor(1.0f, 0.1f, 0.1f, 0.5f);
+        GLES30.glClearColor(0.1f, 0.1f, 0.1f, 0.f);
 
         //set depth test
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
