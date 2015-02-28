@@ -1,8 +1,11 @@
 package bitshifting.aircanvas;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.vrtoolkit.cardboard.CardboardActivity;
 import com.google.vrtoolkit.cardboard.CardboardView;
@@ -56,5 +59,16 @@ public class MainActivity extends CardboardActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /** Check if this device has a camera */
+    private boolean checkCameraHardware(Context context) {
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+            // this device has a camera
+            Toast.makeText(context, "Camera detected!", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        Toast.makeText(context, "You need a camera!", Toast.LENGTH_SHORT).show();
+        return false;
     }
 }
