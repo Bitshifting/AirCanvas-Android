@@ -82,11 +82,6 @@ public class Cube {
 
         MainRenderer.checkGLError("COMPILING");
 
-
-        //enable vertex attrib array for those that need it (the attributes)
-        GLES30.glEnableVertexAttribArray(verticesID);
-        GLES30.glEnableVertexAttribArray(normalID);
-
         GLES30.glUseProgram(0);
 
         //set up the float buffers
@@ -106,6 +101,9 @@ public class Cube {
     public void render(float[] projectionMatrix, float[] viewMatrix) {
         GLES30.glUseProgram(program);
 
+        //enable vertex attrib array for those that need it (the attributes)
+        GLES30.glEnableVertexAttribArray(verticesID);
+
         //once program has been bound, set the attributes of within the shader
         //set parameters
         GLES30.glUniformMatrix4fv(modelID, 1, false, modelMatrix, 0);
@@ -122,6 +120,10 @@ public class Cube {
 //        MainRenderer.checkGLError("RENDER");
 
         GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, vertices.length / 3);
+
+        //enable vertex attrib array for those that need it (the attributes)
+        GLES30.glDisableVertexAttribArray(verticesID);
+        GLES30.glUseProgram(0);
     }
 
     public void update(float dt) {

@@ -3,6 +3,7 @@ package bitshifting.aircanvas;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.opengl.GLES20;
 import android.opengl.GLES30;
 import android.opengl.Matrix;
 import android.util.Log;
@@ -53,10 +54,10 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener 
     private short drawOrder2[] = {2, 0, 3, 3, 0, 1}; // order to draw vertices
 
     static float textureVertices[] = {
-            0.0f, 1.0f,  -Float.MAX_VALUE,  // A. left-bottom
-            1.0f, 1.0f,  -Float.MAX_VALUE, // B. right-bottom
-            0.0f, 0.0f,  -Float.MAX_VALUE, // C. left-top
-            1.0f, 0.0f   -Float.MAX_VALUE // D. right-top
+            0.0f, 1.0f,  // A. left-bottom
+            1.0f, 1.0f, // B. right-bottom
+            0.0f, 0.0f, // C. left-top
+            1.0f, 0.0f // D. right-top
     };
 
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
@@ -90,11 +91,9 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener 
         GLES30.glActiveTexture(GL_TEXTURE_EXTERNAL_OES);
         GLES30.glBindTexture(GL_TEXTURE_EXTERNAL_OES, texture);
 
-
-
         mPositionHandle = GLES30.glGetAttribLocation(mProgram, "position");
         GLES30.glEnableVertexAttribArray(mPositionHandle);
-        GLES30.glVertexAttribPointer(mPositionHandle, 3, GLES30.GL_FLOAT,
+        GLES30.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES30.GL_FLOAT,
                 false,vertexStride, vertexBuffer);
 
 
@@ -105,11 +104,14 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener 
 
         mColorHandle = GLES30.glGetAttribLocation(mProgram, "s_texture");
 
-
+        GLES30.glDisable(GLES30.GL_DEPTH_TEST);
+        GLES30.glDepthMask(false);
 
         GLES30.glDrawElements(GLES30.GL_TRIANGLES, drawOrder.length,
                 GLES30.GL_UNSIGNED_SHORT, drawListBuffer);
 
+        GLES30.glEnable(GLES30.GL_DEPTH_TEST);
+        GLES30.glDepthMask(true);
 
         // Disable vertex array
         GLES30.glDisableVertexAttribArray(mPositionHandle);

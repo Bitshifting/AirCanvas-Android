@@ -60,10 +60,10 @@ public class MainRenderer implements CardboardView.StereoRenderer {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
         cameraRenderer.onDrawEye(eye);
+
         projectionMatrix = eye.getPerspective(Z_NEAR, Z_FAR);
         Matrix.multiplyMM(viewMatrix, 0, eye.getEyeView(), 0, camera, 0);
         testCube.render(projectionMatrix, viewMatrix);
-
 
     }
 
