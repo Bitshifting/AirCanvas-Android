@@ -1,22 +1,20 @@
 package bitshifting.aircanvas;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.vrtoolkit.cardboard.CardboardActivity;
 import com.google.vrtoolkit.cardboard.CardboardView;
-import com.google.vrtoolkit.cardboard.Eye;
-import com.google.vrtoolkit.cardboard.HeadTransform;
-import com.google.vrtoolkit.cardboard.Viewport;
-
-import javax.microedition.khronos.egl.EGLConfig;
 
 
-public class MainActivity extends CardboardActivity implements CardboardView.StereoRenderer {
+public class MainActivity extends CardboardActivity {
 
     private static final String TAG = "MainActivity";
+
+    //set renderer to the main renderer class
+    MainRenderer renderer;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,49 +25,16 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         CardboardView cardboardView = (CardboardView) findViewById(R.id.cardboard_view);
 
         //set renderer
-        cardboardView.setRenderer(this);
+        renderer = new MainRenderer();
+        cardboardView.setRenderer(renderer);
         setCardboardView(cardboardView);
-    }
-
-    //called every frame
-    @Override
-    public void onNewFrame(HeadTransform headTransform) {
-
-    }
-
-    //render function
-    @Override
-    public void onDrawEye(Eye eye) {
-
     }
 
     //called when button is pressed
     @Override
     public void onCardboardTrigger() {
-
+        renderer.onCardboardTrigger();
     }
-
-    @Override
-    public void onFinishFrame(Viewport viewport) {
-
-    }
-
-    @Override
-    public void onRendererShutdown() {
-        Log.i(TAG, "onRendererShutdown");
-    }
-
-    @Override
-    public void onSurfaceChanged(int width, int height) {
-        Log.i(TAG, "onSurfaceChanged");
-    }
-
-    // called when world starts
-    @Override
-    public void onSurfaceCreated(EGLConfig config) {
-
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
