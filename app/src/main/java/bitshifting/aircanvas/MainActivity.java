@@ -28,7 +28,7 @@ public class MainActivity extends CardboardActivity {
         CardboardView cardboardView = (CardboardView) findViewById(R.id.cardboard_view);
 
         //set renderer
-        renderer = new MainRenderer();
+        renderer = new MainRenderer(getApplicationContext());
         cardboardView.setRenderer(renderer);
         setCardboardView(cardboardView);
     }

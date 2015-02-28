@@ -1,5 +1,6 @@
 package bitshifting.aircanvas;
 
+import android.content.Context;
 import android.opengl.GLES30;
 import android.util.Log;
 
@@ -10,6 +11,8 @@ import com.google.vrtoolkit.cardboard.Viewport;
 
 import javax.microedition.khronos.egl.EGLConfig;
 
+import bitshifting.aircanvas.Graphics.Managers.ShaderManager;
+
 /**
  * Created by Kenneth on 2/28/15.
  */
@@ -18,6 +21,9 @@ import javax.microedition.khronos.egl.EGLConfig;
 public class MainRenderer implements CardboardView.StereoRenderer {
 
     public static final String TAG = "MainRenderer";
+
+    Context context;
+    ShaderManager shaderManager;
 
     //called every frame (update)
     @Override
@@ -60,18 +66,19 @@ public class MainRenderer implements CardboardView.StereoRenderer {
         //set a clear color
         GLES30.glClearColor(0.1f, 0.1f, 0.1f, 0.f);
 
-        //set depth test
+        //set depth asdfasdfasdf
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
 
-        //set alpha test
+        //set alpha asdfasdfasdf
         GLES30.glEnable(GLES30.GL_BLEND);
         GLES30.glBlendFunc (GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
 
     }
 
     //constructor
-    public MainRenderer() {
-
+    public MainRenderer(Context ctx) {
+        context = ctx;
+        shaderManager = new ShaderManager(ctx);
     }
 
 }
