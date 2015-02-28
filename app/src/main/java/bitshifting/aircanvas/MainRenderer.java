@@ -112,7 +112,7 @@ public class MainRenderer implements CardboardView.StereoRenderer {
         //create a cube a a bit aways
         float[] pos = {0, 0, -10.f};
         float[] color = {1, 0, 0};
-        testCube = new Cube(pos, color, 5.f, shaderManager.getShader("NoLight"));
+        testCube = new Cube(pos, color, 2.f, shaderManager.getShader("NoLight"));
 
         cameraRenderer.onSurfaceCreated(config);
 

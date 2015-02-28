@@ -7,6 +7,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.vrtoolkit.cardboard.CardboardActivity;
 import com.google.vrtoolkit.cardboard.CardboardView;
 
@@ -15,8 +19,12 @@ public class MainActivity extends CardboardActivity {
 
     private static final String TAG = "MainActivity";
 
+    private static String FBUrl = "https://aircanvasfb.firebaseapp.com";
+
     //set renderer to the main renderer class
     MainRenderer renderer;
+
+    Firebase firebase;
 
 
     @Override
@@ -31,6 +39,10 @@ public class MainActivity extends CardboardActivity {
         renderer = new MainRenderer(getApplicationContext(), cardboardView);
         cardboardView.setRenderer(renderer);
         setCardboardView(cardboardView);
+        Firebase.setAndroidContext(this);
+        firebase = new Firebase(FBUrl);
+
+        testFireBase();
     }
 
     //called when button is pressed
@@ -70,5 +82,24 @@ public class MainActivity extends CardboardActivity {
         }
         Toast.makeText(context, "You need a camera!", Toast.LENGTH_SHORT).show();
         return false;
+    }
+
+    private void testFireBase() {
+
+        // set up event listener
+        firebase.child("message").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Toast.makeText(getApplicationContext(), "Firebase connected! - " + (String) dataSnapshot.getValue(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Toast.makeText(getApplicationContext(), "Firebase Error.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        firebase.child("message").setValue("Test Message");
+
     }
 }
