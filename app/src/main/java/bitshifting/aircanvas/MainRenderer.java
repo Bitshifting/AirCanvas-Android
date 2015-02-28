@@ -61,9 +61,9 @@ public class MainRenderer implements CardboardView.StereoRenderer {
 
         cameraRenderer.onDrawEye(eye);
 
-        projectionMatrix = eye.getPerspective(Z_NEAR, Z_FAR);
-        Matrix.multiplyMM(viewMatrix, 0, eye.getEyeView(), 0, camera, 0);
-        testCube.render(projectionMatrix, viewMatrix);
+//        projectionMatrix = eye.getPerspective(Z_NEAR, Z_FAR);
+//        Matrix.multiplyMM(viewMatrix, 0, eye.getEyeView(), 0, camera, 0);
+//        testCube.render(projectionMatrix, viewMatrix);
 
     }
 

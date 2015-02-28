@@ -3,7 +3,6 @@ package bitshifting.aircanvas;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.opengl.GLES20;
 import android.opengl.GLES30;
 import android.opengl.Matrix;
 import android.util.Log;
@@ -23,13 +22,14 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import bitshifting.aircanvas.Graphics.Managers.ShaderManager;
+import bitshifting.aircanvas.Picture.PictureTaken;
 
 /**
  * Created by Kenneth on 2/28/15.
  */
 
 //This class will hold the starting point of all the opengl code
-public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener {
+public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener, Camera.PreviewCallback {
 
     public static final String TAG = "CardboardCamera";
 
@@ -66,6 +66,15 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener 
 
     private int texture;
 
+
+    //for the camera
+    //This variable is responsible for getting and setting the camera settings
+    private Camera.Parameters parameters;
+    //this variable stores the camera preview size
+    private Camera.Size previewSize;
+    //this array stores the pixels as hexadecimal pairs
+    private int[] pixels;
+
     static final int COORDS_PER_VERTEX = 2;
 
     static float squareVertices[] = { // in counterclockwise order:
@@ -75,12 +84,13 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener 
             1.0f, 1.0f,   // 3. right - top
     };
 
-
+    int count;
 
     //called every frame (update)
     public void onNewFrame(HeadTransform headTransform) {
         float[] mtx = new float[16];
         surface.updateTexImage();
+
         surface.getTransformMatrix(mtx);
     }
 
@@ -88,7 +98,6 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener 
     public void onDrawEye(Eye eye) {
         GLES30.glUseProgram(mProgram);
 
-        GLES30.glActiveTexture(GL_TEXTURE_EXTERNAL_OES);
         GLES30.glBindTexture(GL_TEXTURE_EXTERNAL_OES, texture);
 
         mPositionHandle = GLES30.glGetAttribLocation(mProgram, "position");
@@ -117,7 +126,8 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener 
         GLES30.glDisableVertexAttribArray(mPositionHandle);
         GLES30.glDisableVertexAttribArray(mTextureCoordHandle);
 
-        Matrix.multiplyMM(mView, 0, eye.getEyeView(), 0, mCamera, 0);    }
+        Matrix.multiplyMM(mView, 0, eye.getEyeView(), 0, mCamera, 0);
+    }
 
     //called when button is pressed
     public void onCardboardTrigger() {
@@ -194,9 +204,14 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener 
 
         camera = Camera.open();
 
+        parameters = camera.getParameters();
+        previewSize = parameters.getPreviewSize();
+        pixels = new int[previewSize.width * previewSize.height];
+
         try
         {
             camera.setPreviewTexture(surface);
+            camera.setPreviewCallback(this);
             camera.startPreview();
         }
         catch (IOException ioe)
@@ -212,10 +227,57 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener 
         this.context = ctx;
         mView = new float[16];
         mCamera = new float[16];
+        count = 0;
     }
 
     @Override
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+
         this.cardboardView.requestRender();
+    }
+
+    @Override
+    public void onPreviewFrame(byte[] data, Camera camera) {
+
+        count++;
+        if(count == 60) {
+            //transforms NV21 pixel data into RGB pixels
+            decodeYUV420SP(pixels, data, previewSize.width,  previewSize.height);
+            //Outuput the value of the top left pixel in the preview to LogCat
+            Log.i("Pixels", "The top right pixel has the following RGB (hexadecimal) values:"
+                    +Integer.toHexString(pixels[0]));
+            count = 0;
+        }
+    }
+
+    void decodeYUV420SP(int[] rgb, byte[] yuv420sp, int width, int height) {
+
+        final int frameSize = width * height;
+
+        for (int j = 0, yp = 0; j < height; j++) {       int uvp = frameSize + (j >> 1) * width, u = 0, v = 0;
+            for (int i = 0; i < width; i++, yp++) {
+                int y = (0xff & ((int) yuv420sp[yp])) - 16;
+                if (y < 0)
+                    y = 0;
+                if ((i & 1) == 0) {
+                    v = (0xff & yuv420sp[uvp++]) - 128;
+                    u = (0xff & yuv420sp[uvp++]) - 128;
+                }
+
+                int y1192 = 1192 * y;
+                int r = (y1192 + 1634 * v);
+                int g = (y1192 - 833 * v - 400 * u);
+                int b = (y1192 + 2066 * u);
+
+                if (r < 0)                  r = 0;               else if (r > 262143)
+                    r = 262143;
+                if (g < 0)                  g = 0;               else if (g > 262143)
+                    g = 262143;
+                if (b < 0)                  b = 0;               else if (b > 262143)
+                    b = 262143;
+
+                rgb[yp] = 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) & 0xff00) | ((b >> 10) & 0xff);
+            }
+        }
     }
 }
