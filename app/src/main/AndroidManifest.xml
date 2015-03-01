@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="bitshifting.aircanvas" >
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.NFC" />
@@ -10,6 +11,8 @@
 
     <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="19"/>
     <uses-feature android:glEsVersion="0x00030000" android:required="true" />
+
+
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
