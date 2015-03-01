@@ -8,12 +8,10 @@ import java.util.List;
  */
 public class Canvas {
     private String OwnerID;
-    private String CanvasID;
     private List<BrushStroke> brushStrokes;
 
     public Canvas(String ownerID) {
         this.OwnerID = ownerID;
-        this.CanvasID = genCanvasID();
         this.brushStrokes = new ArrayList<BrushStroke>();
     }
 
@@ -21,16 +19,7 @@ public class Canvas {
         return OwnerID;
     }
 
-    public String getCanvasID() {
-        return CanvasID;
-    }
-
     public List<BrushStroke> getBrushStrokes() {
         return brushStrokes;
-    }
-
-    private static String genCanvasID() {
-        // TODO
-        return "123231232isdfkj";
     }
 }
