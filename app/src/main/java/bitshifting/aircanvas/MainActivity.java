@@ -15,9 +15,6 @@ import com.firebase.client.ValueEventListener;
 import com.google.vrtoolkit.cardboard.CardboardActivity;
 import com.google.vrtoolkit.cardboard.CardboardView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import bitshifting.aircanvas.Graphics.Entities.BrushStroke;
 import bitshifting.aircanvas.Graphics.Entities.Canvas;
 import bitshifting.aircanvas.Graphics.Entities.Point;
@@ -27,13 +24,14 @@ public class MainActivity extends CardboardActivity {
 
     private static final String TAG = "MainActivity";
 
-    private static String FBUrl = "https://aircanvasfb.firebaseapp.com";
+    private static String FBUrl = "https://aircanvasfb.firebaseio.com/";
 
     private String UserID;
 
     //set renderer to the main renderer class
     MainRenderer renderer;
-    Firebase firebase;
+    Firebase firebaseRef;
+    Firebase canvasRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,16 +40,15 @@ public class MainActivity extends CardboardActivity {
 
         //get google cardboard
         CardboardView cardboardView = (CardboardView) findViewById(R.id.cardboard_view);
-
+        Firebase.setAndroidContext(this.getApplicationContext());
         //set renderer
         renderer = new MainRenderer(getApplicationContext(), cardboardView);
         cardboardView.setRenderer(renderer);
         setCardboardView(cardboardView);
-        Firebase.setAndroidContext(this);
-        firebase = new Firebase(FBUrl);
-
+        firebaseRef = new Firebase(FBUrl);
         UserID = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
+        canvasRef = firebaseRef.child("canvases");
         testFireBase();
     }
 
@@ -96,7 +93,7 @@ public class MainActivity extends CardboardActivity {
 
     private void setUpListener() {
         // set up event listener
-        firebase.getRoot().child("message").addValueEventListener(new ValueEventListener() {
+        firebaseRef.getRoot().child("Poop").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue().equals("Test Message")) {
@@ -112,6 +109,20 @@ public class MainActivity extends CardboardActivity {
                 Toast.makeText(getApplicationContext(), "Firebase Error.", Toast.LENGTH_SHORT).show();
             }
         });
+
+        firebaseRef.setValue("LKAJSDFKALSD");
+
+        firebaseRef.getRoot().child("canvases").addValueEventListener( new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Toast.makeText(getApplicationContext(), "Passed!!", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
     }
 
     private void addCanvas() {
@@ -119,24 +130,22 @@ public class MainActivity extends CardboardActivity {
         BrushStroke stroke1 = new BrushStroke(UserID, 1);
         BrushStroke stroke2 = new BrushStroke(UserID, 2);
 
-        List<Point> points = new ArrayList<Point>();
-        points.add(new Point(1, 1));
-        points.add(new Point(1, 2));
-        points.add(new Point(2, 2));
+        stroke1.getPoints().add(new Point(1, 1, 3));
+        stroke1.getPoints().add(new Point(1, 2, 3));
+        stroke1.getPoints().add(new Point(2, 2, 3));
 
-        stroke1.setPoints(points);
+        stroke2.getPoints().add(new Point(4, 5, 5));
+        stroke2.getPoints().add(new Point(4, 4, 5));
 
-        points = new ArrayList<Point>();
+        canvas.getBrushStrokes().add(stroke1);
+        canvas.getBrushStrokes().add(stroke2);
 
-        points.add(new Point(4, 5));
-        points.add(new Point(4,4));
-
-        stroke2.setPoints(points);
-        canvas.addBrushStroke(stroke1);
-        canvas.addBrushStroke(stroke2);
+        canvasRef.push().setValue(canvas);
     }
 
     private void testFireBase() {
-        firebase.child("message").setValue("Test Message");
+        setUpListener();
+        firebaseRef.child("message").setValue("Test Message");
+        addCanvas();
     }
 }

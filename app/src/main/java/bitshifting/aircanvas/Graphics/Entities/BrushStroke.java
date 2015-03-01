@@ -27,8 +27,8 @@ public class BrushStroke {
         return OwnerID;
     }
 
-    public void setPoints(List<Point> points) {
-        this.points = points;
+    public int getColor() {
+        return color;
     }
 
     public List<Point> getPoints() {

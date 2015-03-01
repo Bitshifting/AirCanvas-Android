@@ -25,8 +25,8 @@ public class Canvas {
         return CanvasID;
     }
 
-    public void addBrushStroke(BrushStroke stroke) {
-        brushStrokes.add(stroke);
+    public List<BrushStroke> getBrushStrokes() {
+        return brushStrokes;
     }
 
     private static String genCanvasID() {
