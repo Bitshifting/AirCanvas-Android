@@ -67,8 +67,9 @@ public class CanvasManager {
      *
      * @param points
      */
-    public void addBrushStroke(List<Point> points) {
-        canvas.getBrushStrokes().add(new BrushStroke(OwnerID, color, points));
+    public void addBrushStroke(List<Point> points, float[] color) {
+        int idx = canvas.getBrushStrokes().size();
+        canvas.getBrushStrokes().put(idx, new BrushStroke(OwnerID, color, points));
         // update firebase
         canvasesRef.setValue(canvas);
     }
