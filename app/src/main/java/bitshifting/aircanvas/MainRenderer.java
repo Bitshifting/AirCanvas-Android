@@ -72,6 +72,8 @@ public class MainRenderer implements CardboardView.StereoRenderer, Camera.Previe
 
     int count;
 
+    String OwnerID;
+
     //called every frame (update)
     @Override
     public void onNewFrame(HeadTransform headTransform) {
@@ -89,7 +91,7 @@ public class MainRenderer implements CardboardView.StereoRenderer, Camera.Previe
                 int color = CardboardCamera.getMiddlePixel(data, cameraWidth, cameraHeight);
                 //convert the color to what opengl likes
                 currentColor = new float[] { (float) Color.red(color) / 255.f, (float) Color.green(color) / 255.f, (float) Color.blue(color) / 255.f};
-                pathManager.setDrawing(currentColor, pathManager.listOfColors.size());
+                pathManager.setDrawing(currentColor);
                 firstTime = false;
 
                 canvasManager.addBrushStroke(currentColor);

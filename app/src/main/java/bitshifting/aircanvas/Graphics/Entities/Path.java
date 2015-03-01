@@ -35,10 +35,15 @@ public class Path {
         //set shader
         program = shader;
 
+        viewID = 2;
+        projectionID = 1;
+        colorID = 0;
+
+
         //get parameters from shader
-        viewID = GLES30.glGetUniformLocation(program, "view");
-        projectionID = GLES30.glGetUniformLocation(program, "projection");
-        colorID = GLES30.glGetUniformLocation(program, "color");
+//        viewID = GLES30.glGetUniformLocation(program, "view");
+//        projectionID = GLES30.glGetUniformLocation(program, "projection");
+//        colorID = GLES30.glGetUniformLocation(program, "color");
 
         vertexBuffer = new int[1];
 
