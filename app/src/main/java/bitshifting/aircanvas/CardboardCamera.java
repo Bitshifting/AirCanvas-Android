@@ -29,7 +29,7 @@ import bitshifting.aircanvas.Graphics.Managers.ShaderManager;
  */
 
 //This class will hold the starting point of all the opengl code
-public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener, Camera.PreviewCallback {
+public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener {
 
     public static final String TAG = "CardboardCamera";
 
@@ -49,6 +49,8 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener,
     CardboardView cardboardView;
 
     Context context;
+
+    static MainRenderer instanceOfRenderer;
 
     private short drawOrder[] =  {0, 2, 1, 1, 2, 3 }; // order to draw vertices
     private short drawOrder2[] = {2, 0, 3, 3, 0, 1}; // order to draw vertices
@@ -205,13 +207,19 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener,
         camera = Camera.open();
 
         parameters = camera.getParameters();
+
+
         previewSize = parameters.getPreviewSize();
         pixels = new int[previewSize.width * previewSize.height];
+
+        //set camera height and width for main renderer
+        MainRenderer.cameraHeight = previewSize.height;
+        MainRenderer.cameraWidth = previewSize.width;
 
         try
         {
             camera.setPreviewTexture(surface);
-            camera.setPreviewCallback(this);
+            camera.setPreviewCallback(instanceOfRenderer);
             camera.startPreview();
         }
         catch (IOException ioe)
@@ -222,12 +230,14 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener,
     }
 
     //constructor
-    public CardboardCamera(CardboardView cardboardView, Context ctx) {
+    public CardboardCamera(CardboardView cardboardView, Context ctx, MainRenderer renderer) {
         this.cardboardView = cardboardView;
         this.context = ctx;
         mView = new float[16];
         mCamera = new float[16];
         count = 0;
+
+        instanceOfRenderer = renderer;
     }
 
     @Override
@@ -236,22 +246,8 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener,
         this.cardboardView.requestRender();
     }
 
-    @Override
-    public void onPreviewFrame(byte[] data, Camera camera) {
 
-        count++;
-        if(count == 10) {
-            //transforms NV21 pixel data into RGB pixels
-            decodeYUV420SP(pixels, data, previewSize.width,  previewSize.height);
-            //Outuput the value of the top left pixel in the preview to LogCat
-            Log.i("Pixels", "The top right pixel has the following RGB (hexadecimal) values:"
-                    +Integer.toHexString(pixels[0]));
-
-            count = 0;
-        }
-    }
-
-    void decodeYUV420SP(int[] rgb, byte[] yuv420sp, int width, int height) {
+    static void decodeYUV420SP(int[] rgb, byte[] yuv420sp, int width, int height) {
 
         final int frameSize = width * height;
 
@@ -280,5 +276,40 @@ public class CardboardCamera implements SurfaceTexture.OnFrameAvailableListener,
                 rgb[yp] = 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) & 0xff00) | ((b >> 10) & 0xff);
             }
         }
+    }
+
+    static int getMiddlePixel(byte[] yuv420sp, int width, int height) {
+
+        final int frameSize = width * height;
+
+
+        int i = width / 2;
+        int j = height / 2;
+
+        int uvp = frameSize + (j >> 1) * width, u = 0, v = 0;
+        int yp = frameSize / 2;
+
+
+        int y = (0xff & ((int) yuv420sp[yp])) - 16;
+        if (y < 0)
+            y = 0;
+        if ((i & 1) == 0) {
+            v = (0xff & yuv420sp[uvp++]) - 128;
+            u = (0xff & yuv420sp[uvp++]) - 128;
+        }
+
+        int y1192 = 1192 * y;
+        int r = (y1192 + 1634 * v);
+        int g = (y1192 - 833 * v - 400 * u);
+        int b = (y1192 + 2066 * u);
+
+        if (r < 0)                  r = 0;               else if (r > 262143)
+            r = 262143;
+        if (g < 0)                  g = 0;               else if (g > 262143)
+            g = 262143;
+        if (b < 0)                  b = 0;               else if (b > 262143)
+            b = 262143;
+
+        return 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) & 0xff00) | ((b >> 10) & 0xff);
     }
 }

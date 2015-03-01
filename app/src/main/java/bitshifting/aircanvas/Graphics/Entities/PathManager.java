@@ -13,14 +13,13 @@ import bitshifting.aircanvas.MainRenderer;
  */
 public class PathManager {
     private List<Path> listOfPaths;
-    float[] color;
+    private List<float[]> listOfColors;
 
     Path lastPath;
 
-    public PathManager(float[] color) {
+    public PathManager() {
         listOfPaths = new ArrayList<>();
-
-        this.color = color;
+        listOfColors = new ArrayList<>();
     }
 
     public void render(float[] projectionMatrix, float[] viewMatrix) {
@@ -29,12 +28,10 @@ public class PathManager {
         }
     }
 
-    public void setDrawing(boolean isDrawing) {
-        if(isDrawing) {
-
-            lastPath = new Path(color, ShaderManager.getInstance().getShader("NoLightVBO"));
-            listOfPaths.add(lastPath);
-        }
+    public void setDrawing(float[] color) {
+        listOfColors.add(color);
+        lastPath = new Path(color, ShaderManager.getInstance().getShader("NoLightVBO"));
+        listOfPaths.add(lastPath);
     }
 
     public void update(float[] newPos) {

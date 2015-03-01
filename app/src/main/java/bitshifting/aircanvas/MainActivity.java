@@ -8,16 +8,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.google.vrtoolkit.cardboard.CardboardActivity;
 import com.google.vrtoolkit.cardboard.CardboardView;
-
-import bitshifting.aircanvas.Graphics.Entities.BrushStroke;
-import bitshifting.aircanvas.Graphics.Entities.Canvas;
-import bitshifting.aircanvas.Graphics.Entities.Point;
 
 
 public class MainActivity extends CardboardActivity {
@@ -31,8 +24,6 @@ public class MainActivity extends CardboardActivity {
     //set renderer to the main renderer class
     MainRenderer renderer;
     Firebase firebaseRef;
-    Firebase canvasRef;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,9 +38,6 @@ public class MainActivity extends CardboardActivity {
         setCardboardView(cardboardView);
         firebaseRef = new Firebase(FBUrl);
         UserID = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-
-        canvasRef = firebaseRef.child("canvases");
-        testFireBase();
     }
 
     //called when button is pressed
@@ -94,29 +82,5 @@ public class MainActivity extends CardboardActivity {
     private void setUpListener() {
         // set up event listener
 
-    }
-
-    private void addCanvas() {
-        Canvas canvas = new Canvas(UserID);
-        BrushStroke stroke1 = new BrushStroke(UserID, 1);
-        BrushStroke stroke2 = new BrushStroke(UserID, 2);
-
-        stroke1.getPoints().add(new Point(1, 1, 3));
-        stroke1.getPoints().add(new Point(1, 2, 3));
-        stroke1.getPoints().add(new Point(2, 2, 3));
-
-        stroke2.getPoints().add(new Point(4, 5, 5));
-        stroke2.getPoints().add(new Point(4, 4, 5));
-
-        canvas.getBrushStrokes().add(stroke1);
-        canvas.getBrushStrokes().add(stroke2);
-
-        canvasRef.push().setValue(canvas);
-    }
-
-    private void testFireBase() {
-        setUpListener();
-        firebaseRef.child("message").setValue("Test Message");
-        addCanvas();
     }
 }

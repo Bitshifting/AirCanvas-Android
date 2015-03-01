@@ -1,6 +1,8 @@
 package bitshifting.aircanvas;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.hardware.Camera;
 import android.opengl.GLES30;
 import android.opengl.Matrix;
 import android.util.Log;
@@ -23,7 +25,7 @@ import bitshifting.aircanvas.Graphics.Managers.ShaderManager;
  */
 
 //This class will hold the starting point of all the opengl code
-public class MainRenderer implements CardboardView.StereoRenderer {
+public class MainRenderer implements CardboardView.StereoRenderer, Camera.PreviewCallback {
 
     //used to get perspective matrix
     private static final float Z_NEAR = 0.1f;
@@ -34,6 +36,11 @@ public class MainRenderer implements CardboardView.StereoRenderer {
 
 
     public static final String TAG = "MainRenderer";
+
+    //hold a static value of the current image data
+    static byte[] data;
+    static int cameraWidth;
+    static int cameraHeight;
 
     Context context;
     ShaderManager shaderManager;
@@ -57,6 +64,8 @@ public class MainRenderer implements CardboardView.StereoRenderer {
     //boolean to start and stop drawing
     boolean startDrawing;
     boolean firstTime;
+    float[] currentColor;
+
     int count;
 
     //called every frame (update)
@@ -69,7 +78,11 @@ public class MainRenderer implements CardboardView.StereoRenderer {
         if(startDrawing) {
             if(firstTime) {
                 //create new path due to first time
-                pathManager.setDrawing(startDrawing);
+                int color = CardboardCamera.getMiddlePixel(data, cameraWidth, cameraHeight);
+
+                //convert the color to what opengl likes
+                currentColor = new float[] { (float) Color.red(color) / 255.f, (float) Color.green(color) / 255.f, (float) Color.blue(color) / 255.f};
+                pathManager.setDrawing(currentColor);
                 firstTime = false;
             }
 
@@ -80,10 +93,8 @@ public class MainRenderer implements CardboardView.StereoRenderer {
                 float[] forwardVec = new float[3];
                 headTransform.getForwardVector(forwardVec, 0);
 
-                //forwardVec[1] *= -1.f;
+                forwardVec[1] *= -1.f;
                 forwardVec[0] *= -1.f;
-
-                //Log.d("POSITION", "(" + forwardVec[0] + "," + forwardVec[1] + "," + forwardVec[2] + ")");
 
                 for(int i = 0; i < forwardVec.length; i++) {
                     forwardVec[i] = forwardVec[i] * 5.0f;
@@ -107,9 +118,9 @@ public class MainRenderer implements CardboardView.StereoRenderer {
 
         cameraRenderer.onDrawEye(eye);
 
-        projectionMatrix = eye.getPerspective(Z_NEAR, Z_FAR);
-        Matrix.multiplyMM(viewMatrix, 0, eye.getEyeView(), 0, camera, 0);
-        testCube.render(projectionMatrix, viewMatrix);
+//        projectionMatrix = eye.getPerspective(Z_NEAR, Z_FAR);
+//        Matrix.multiplyMM(viewMatrix, 0, eye.getEyeView(), 0, camera, 0);
+//        testCube.render(projectionMatrix, viewMatrix);
 
        pathManager.render(projectionMatrix, viewMatrix);
     }
@@ -164,16 +175,7 @@ public class MainRenderer implements CardboardView.StereoRenderer {
         float[] color = {1, 0, 0};
         testCube = new Cube(pos, color, 2.f, shaderManager.getShader("NoLight"));
 
-        float[] pathColor = new float[3];
-
-        //get a random color
-        Random rand = new Random();
-        for(int i = 0; i < pathColor.length; i++)
-        {
-            pathColor[i] = rand.nextFloat();
-        }
-
-        pathManager = new PathManager(pathColor);
+        pathManager = new PathManager();
 
         cameraRenderer.onSurfaceCreated(config);
 
@@ -198,7 +200,7 @@ public class MainRenderer implements CardboardView.StereoRenderer {
         viewMatrix = new float[16];
         camera = new float[16];
 
-        cameraRenderer = new CardboardCamera(cardboardView, ctx);
+        cameraRenderer = new CardboardCamera(cardboardView, ctx, this);
     }
 
     public static void checkGLError(String label) {
@@ -207,6 +209,23 @@ public class MainRenderer implements CardboardView.StereoRenderer {
             Log.e(TAG, label + ": glError " + error);
             throw new RuntimeException(label + ": glError " + error);
         }
+    }
+
+    @Override
+    public void onPreviewFrame(byte[] data, Camera camera) {
+        MainRenderer.data = data;
+
+
+//        count++;
+//        if(count == 10) {
+//            //transforms NV21 pixel data into RGB pixels
+//            decodeYUV420SP(pixels, data, previewSize.width,  previewSize.height);
+//            //Outuput the value of the top left pixel in the preview to LogCat
+//            Log.i("Pixels", "The top right pixel has the following RGB (hexadecimal) values:"
+//                    +Integer.toHexString(pixels[0]));
+//
+//            count = 0;
+//        }
     }
 
 }
