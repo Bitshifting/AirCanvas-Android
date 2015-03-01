@@ -6,14 +6,16 @@ import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
-import bitshifting.aircanvas.Graphics.Entities.BrushStroke;
-import bitshifting.aircanvas.Graphics.Entities.Canvas;
-import bitshifting.aircanvas.Graphics.Entities.Point;
+import bitshifting.aircanvas.Graphics.Entities.PathManager;
 
 /**
  * Created by ricardolopez on 2/28/15.
@@ -21,17 +23,30 @@ import bitshifting.aircanvas.Graphics.Entities.Point;
 public class CanvasManager {
     public static final String TAG = "CanvasManager";
 
-    private Canvas canvas;
-    private String CanvasID;
     private String OwnerID;
-    private Firebase canvasesRef;
-    private Firebase canvasRef;
 
-    private int color;
+    //overarching reference
+    private Firebase ref;
 
-    private String currentStroke;
+    //current owner
+    private Firebase ownerRef;
 
-    private ChildEventListener currListener;
+    //current stroke we are on
+    private Firebase currStroke;
+
+    //current points of database
+    private Firebase currPoints;
+
+    //used to get the next point index
+    int currPointInd;
+
+    //used to get the current brush
+    int currStrokeInd;
+
+    //random when needed
+    Random rand;
+
+    public HashMap<String, PathManager> otherPathManagers;
 
     /**
      * Construct a manager without a canvasID (i.e. generate a new canvas)
@@ -40,35 +55,18 @@ public class CanvasManager {
      * @param ownerID
      */
     public CanvasManager(Firebase ref, String ownerID) {
-        this(ref, ownerID, null);
-    }
-
-    /**
-     * Construct a manager with a canvasID in order to connect to an existing
-     * canvas
-     *
-     * @param ref
-     * @param ownerID
-     * @param canvasID
-     */
-    public CanvasManager(Firebase ref, String ownerID, String canvasID) {
         this.OwnerID = ownerID;
-        this.canvasesRef = ref.child("canvases");
+        ownerRef = ref.child(this.OwnerID);
+        //remove the last value
+        ownerRef.removeValue();
+        currStrokeInd = 0;
+        this.ref = ref;
 
-        // set up the CanvasID
-        this.CanvasID = (canvasID == null) ? generateCanvas(ownerID) : canvasID;
-        // connect to the canvas
-        this.canvasRef = canvasesRef.child(CanvasID);
+        rand = new Random();
+
+        addRefEventListener();
     }
 
-    /**
-     * Get the current canvasID
-     *
-     * @return
-     */
-    public String getCanvasID() {
-        return CanvasID;
-    }
 
     /**
      * Add a new stroke given a list of points. This method handles creation of a new stroke
@@ -77,13 +75,15 @@ public class CanvasManager {
      * @param color
      */
     public void addBrushStroke(float[] color) {
-        int idx = canvas.getBrushStrokes().size();
-        Firebase holder = canvasRef.push();
-        canvas.getBrushStrokes().put(idx, new BrushStroke(OwnerID, color));
         // update Firebase
-        holder.setValue(canvas);
-        updateEventListener(currentStroke, holder.getKey());
-        currentStroke = holder.getKey();
+        currStroke = ownerRef.child("" + currStrokeInd);
+        currStrokeInd++;
+
+        currStroke.child("Color").setValue(color);
+
+        currPoints = currStroke.child("Points");
+
+        currPointInd = 0;
     }
 
     /**
@@ -91,110 +91,130 @@ public class CanvasManager {
      * @param point
      */
     public void addPointToStroke(float[] point) {
-        if (currentStroke == null) {
+        if (currPoints == null) {
             return;
         }
-        int idx = canvas.getBrushStrokes().size() - 1;
-        canvas.getBrushStrokes().get(idx).getPoints().add(point);
-        canvasRef.child("brushStrokes").child(currentStroke).push().setValue(point);
+
+        currStroke.child("" + currPointInd).setValue(point);
+        currPointInd++;
     }
 
-    /**
-     *
-     * @param oldStroke
-     * @param newStroke
-     */
-    public void updateEventListener(String oldStroke, String newStroke)  {
-        if (currListener != null) {
-            canvasRef.child("brushStrokes").child(oldStroke).removeEventListener(currListener);
-        }
+    public void addRefEventListener() {
 
-        currListener = canvasRef.child("brushStroke").child(newStroke).addChildEventListener(new ChildEventListener() {
+        ChildEventListener tempChildListener = new ChildEventListener() {
+
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.e(TAG, dataSnapshot.getValue().toString());
+                String hey = dataSnapshot.getKey();
+                System.out.println("ASDFLKJ");
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Log.e(TAG, dataSnapshot.getValue().toString());
+                if (dataSnapshot != null) {
 
+                    if (dataSnapshot.getValue() == null) {
+                        return;
+                    }
+
+                    HashMap<String, Object> tempMap = (HashMap<String, Object>) dataSnapshot.getValue();
+
+                    //check if it's own
+                    if (dataSnapshot.getKey().equals(OwnerID)) {
+                        return;
+                    }
+
+                    String newOwner = dataSnapshot.getKey();
+                    //if never seen before, create new entry
+                    if (!otherPathManagers.containsKey(newOwner)) {
+                        otherPathManagers.put(newOwner, new PathManager());
+                    }
+
+                    //iterate through owner keys
+                    for (int i = 0; i < tempMap.size(); i++) {
+
+
+                        //iterate through brush
+                        Map<String, Object> strokeNum = new HashMap<>();// = (Map<String, Object>) tempMap.get((Object)("ASDF"));
+
+                        if (strokeNum == null) {
+                            continue;
+                        }
+
+                        for (String nBrushNum : strokeNum.keySet()) {
+                            //if never seen brush before add the brush to path managers
+                            PathManager tempPathManage = otherPathManagers.get(newOwner);
+
+                            Map<String, Object> colorValBranch = (Map<String, Object>) strokeNum.get(nBrushNum);
+
+                            if (colorValBranch == null) {
+                                continue;
+                            }
+
+                            for (String lastKey : colorValBranch.keySet()) {
+                                int ind = Integer.parseInt(nBrushNum);
+                                Map<Integer, Float> lastMap = (Map<Integer, Float>) colorValBranch.get(lastKey);
+                                if (tempPathManage.listOfPaths.containsKey(ind)) {
+                                    //check if color
+                                    if (lastKey.equals("Color")) {
+                                        float[] color = new float[3];
+                                        color[0] = lastMap.get(0);
+                                        color[1] = lastMap.get(1);
+                                        color[2] = lastMap.get(2);
+
+                                        tempPathManage.setColor(color, ind);
+                                    } else {
+                                        float[] newPos = new float[3];
+                                        newPos[0] = lastMap.get(0);
+                                        newPos[1] = lastMap.get(1);
+                                        newPos[2] = lastMap.get(2);
+                                        tempPathManage.update(newPos);
+                                    }
+
+                                } else {
+                                    float[] color = new float[3];
+                                    if (lastKey.equals("Color")) {
+                                        color[0] = lastMap.get(0);
+                                        color[1] = lastMap.get(1);
+                                        color[2] = lastMap.get(2);
+                                    } else {
+                                        color[0] = rand.nextFloat();
+                                        color[1] = rand.nextFloat();
+                                        color[2] = rand.nextFloat();
+                                    }
+
+                                    tempPathManage.setDrawing(color, ind);
+                                }
+                            }
+
+                        }
+
+                    }
+                }
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Log.e(TAG, dataSnapshot.getValue().toString());
 
             }
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                Log.e(TAG, dataSnapshot.getValue().toString());
 
             }
 
             @Override
             public void onCancelled(FirebaseError firebaseError) {
-                Log.e(TAG, "fb error");
-
+                Log.e("FAIL", "FAILURE TO READ");
             }
-        });
-    }
+        };
 
-    /**
-     * Set up the firebase event listeners to update the user's canvas
-     *
-     */
-    private void setUpEventListeners() {
-        if (canvasRef == null) {
-            return;
+        if(!this.OwnerID.equals("85b364c34013facc")) {
+            ref.child("85b364c34013facc").addChildEventListener(tempChildListener);
         }
 
-        // set up the current canvas brushStrokes listener
-        canvasRef.child("brushStrokes").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.e(TAG, dataSnapshot.getValue().toString());
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Log.e(TAG, dataSnapshot.getValue().toString());
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Log.e(TAG, dataSnapshot.getValue().toString());
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                Log.e(TAG, dataSnapshot.getValue().toString());
-
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                Log.e(TAG, "fb error");
-
-            }
-        });
-    }
-
-    /**
-     * Private function to encapsulate creation of a new canvas
-     *
-     * @param ownerID
-     * @return
-     */
-    private String generateCanvas(String ownerID) {
-        Firebase newPostRef = canvasesRef.push();
-
-        canvas = new Canvas(ownerID);
-        newPostRef.setValue(canvas);
-
-        return newPostRef.getKey();
+        if(!this.OwnerID.equals("7a4257a0d655f168")) {
+            ref.child("7a4257a0d655f168").addChildEventListener(tempChildListener);
+        }
     }
 }

@@ -1,13 +1,10 @@
 package bitshifting.aircanvas.Graphics.Entities;
 
 import android.opengl.GLES30;
-import android.opengl.Matrix;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import bitshifting.aircanvas.MainRenderer;
 
@@ -29,7 +26,6 @@ public class Path {
     int colorID;
     int projectionID;
     int viewID;
-    int modelID;
 
     int[] vertexBuffer;
 
@@ -40,7 +36,6 @@ public class Path {
         program = shader;
 
         //get parameters from shader
-        modelID = GLES30.glGetUniformLocation(program, "model");
         viewID = GLES30.glGetUniformLocation(program, "view");
         projectionID = GLES30.glGetUniformLocation(program, "projection");
         colorID = GLES30.glGetUniformLocation(program, "color");

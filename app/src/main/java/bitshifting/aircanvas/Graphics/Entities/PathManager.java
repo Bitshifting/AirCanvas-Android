@@ -1,37 +1,33 @@
 package bitshifting.aircanvas.Graphics.Entities;
 
-import android.opengl.GLES30;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import bitshifting.aircanvas.Graphics.Managers.ShaderManager;
-import bitshifting.aircanvas.MainRenderer;
 
 /**
  * Created by Kenneth on 2/28/15.
  */
 public class PathManager {
-    private List<Path> listOfPaths;
-    private List<float[]> listOfColors;
+    public HashMap<Integer, Path> listOfPaths;
+    public HashMap<Integer, float[]> listOfColors;
 
     Path lastPath;
 
     public PathManager() {
-        listOfPaths = new ArrayList<>();
-        listOfColors = new ArrayList<>();
+        listOfPaths = new HashMap<>();
+        listOfColors = new HashMap<>();
     }
 
     public void render(float[] projectionMatrix, float[] viewMatrix) {
-        for(int i = 0; i < listOfPaths.size(); i++) {
-            listOfPaths.get(i).render(projectionMatrix, viewMatrix);
+        for(Integer key : listOfPaths.keySet()) {
+            listOfPaths.get(key).render(projectionMatrix, viewMatrix);
         }
     }
 
-    public void setDrawing(float[] color) {
-        listOfColors.add(color);
+    public void setDrawing(float[] color, int index) {
+        listOfColors.put(index, color);
         lastPath = new Path(color, ShaderManager.getInstance().getShader("NoLightVBO"));
-        listOfPaths.add(lastPath);
+        listOfPaths.put(index, lastPath);
     }
 
     public void update(float[] newPos) {
@@ -40,4 +36,8 @@ public class PathManager {
         }
     }
 
+    public void setColor(float[] color, int index) {
+        listOfColors.put(index, color);
+        listOfPaths.get(index).color = color;
+    }
 }

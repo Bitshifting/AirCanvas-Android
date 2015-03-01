@@ -8,16 +8,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.google.vrtoolkit.cardboard.CardboardActivity;
 import com.google.vrtoolkit.cardboard.CardboardView;
 
-import bitshifting.aircanvas.Graphics.Entities.BrushStroke;
-import bitshifting.aircanvas.Graphics.Entities.Canvas;
-import bitshifting.aircanvas.Graphics.Entities.Point;
 import bitshifting.aircanvas.Graphics.Managers.CanvasManager;
 
 

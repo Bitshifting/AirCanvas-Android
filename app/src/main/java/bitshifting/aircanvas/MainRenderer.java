@@ -12,7 +12,7 @@ import com.google.vrtoolkit.cardboard.Eye;
 import com.google.vrtoolkit.cardboard.HeadTransform;
 import com.google.vrtoolkit.cardboard.Viewport;
 
-import java.util.Random;
+import java.util.HashMap;
 
 import javax.microedition.khronos.egl.EGLConfig;
 
@@ -35,8 +35,9 @@ public class MainRenderer implements CardboardView.StereoRenderer, Camera.Previe
     //used for view matrix
     private static final float CAMERA_Z = 0.01f;
 
-
     public static final String TAG = "MainRenderer";
+
+    public HashMap<String, PathManager> otherPathManagers;
 
     //hold a static value of the current image data
     static byte[] data;
@@ -81,10 +82,14 @@ public class MainRenderer implements CardboardView.StereoRenderer, Camera.Previe
         if(startDrawing) {
             if(firstTime) {
                 //create new path due to first time
+                if(data == null) {
+                    return;
+                }
+
                 int color = CardboardCamera.getMiddlePixel(data, cameraWidth, cameraHeight);
                 //convert the color to what opengl likes
                 currentColor = new float[] { (float) Color.red(color) / 255.f, (float) Color.green(color) / 255.f, (float) Color.blue(color) / 255.f};
-                pathManager.setDrawing(currentColor);
+                pathManager.setDrawing(currentColor, pathManager.listOfColors.size());
                 firstTime = false;
 
                 canvasManager.addBrushStroke(currentColor);
@@ -124,12 +129,15 @@ public class MainRenderer implements CardboardView.StereoRenderer, Camera.Previe
 
         cameraRenderer.onDrawEye(eye);
 
-//        projectionMatrix = eye.getPerspective(Z_NEAR, Z_FAR);
-//        Matrix.multiplyMM(viewMatrix, 0, eye.getEyeView(), 0, camera, 0);
+        projectionMatrix = eye.getPerspective(Z_NEAR, Z_FAR);
+        Matrix.multiplyMM(viewMatrix, 0, eye.getEyeView(), 0, camera, 0);
 //        testCube.render(projectionMatrix, viewMatrix);
 
        pathManager.render(projectionMatrix, viewMatrix);
 
+       for(PathManager pm : otherPathManagers.values()) {
+           pm.render(projectionMatrix, viewMatrix);
+       }
 
     }
 
@@ -206,8 +214,11 @@ public class MainRenderer implements CardboardView.StereoRenderer, Camera.Previe
         shaderManager.setContext(ctx);
         viewMatrix = new float[16];
         camera = new float[16];
+        this.otherPathManagers = new HashMap<>();
         this.canvasManager = canvasManager;
+        this.canvasManager.otherPathManagers = this.otherPathManagers;
         cameraRenderer = new CardboardCamera(cardboardView, ctx, this);
+
     }
 
     public static void checkGLError(String label) {

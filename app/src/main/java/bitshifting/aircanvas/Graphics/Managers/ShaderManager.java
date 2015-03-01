@@ -9,9 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Hashtable;
-import java.util.Map;
-
-import bitshifting.aircanvas.MainRenderer;
 
 /**
  * Created by Kenneth on 2/28/15.

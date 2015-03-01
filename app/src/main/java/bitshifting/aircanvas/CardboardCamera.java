@@ -1,7 +1,6 @@
 package bitshifting.aircanvas;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES30;
