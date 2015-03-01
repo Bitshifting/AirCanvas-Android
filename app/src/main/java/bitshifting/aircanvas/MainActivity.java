@@ -93,36 +93,7 @@ public class MainActivity extends CardboardActivity {
 
     private void setUpListener() {
         // set up event listener
-        firebaseRef.getRoot().child("Poop").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue().equals("Test Message")) {
-                    Toast.makeText(getApplicationContext(), "Firebase connected! - " + (String) dataSnapshot.getValue(), Toast.LENGTH_LONG).show();
-                }
-                else {
-                    Toast.makeText(getApplicationContext(), "Firebase failed to connect!", Toast.LENGTH_LONG).show();
-                }
-            }
 
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                Toast.makeText(getApplicationContext(), "Firebase Error.", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        firebaseRef.setValue("LKAJSDFKALSD");
-
-        firebaseRef.getRoot().child("canvases").addValueEventListener( new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Toast.makeText(getApplicationContext(), "Passed!!", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
     }
 
     private void addCanvas() {
