@@ -101,7 +101,7 @@ public class Path {
         verticesBuff = tempVertBuff.asFloatBuffer();
         verticesBuff.put(newPos);
         verticesBuff.position(0);
-        GLES30.glBufferSubData(GLES30.GL_ARRAY_BUFFER, size * 4, 3 * 4, verticesBuff);
+        GLES30.glBufferSubData(GLES30.GL_ARRAY_BUFFER, size * 4 * 3, 3 * 4, verticesBuff);
 
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
 

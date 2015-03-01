@@ -38,7 +38,9 @@ public class PathManager {
     }
 
     public void update(float[] newPos) {
-        lastPath.update(newPos);
+        if(lastPath != null) {
+            lastPath.update(newPos);
+        }
     }
 
 }
