@@ -9,15 +9,15 @@ import java.util.List;
 public class BrushStroke {
     private String OwnerID;
     private float[] color;
-    private List<Point> points;
+    private List<float[]> points;
 
     public BrushStroke(String ownerID, float[] color) {
         this.OwnerID = ownerID;
         this.color = color;
-        this.points = new ArrayList<Point>();
+        this.points = new ArrayList<>();
     }
 
-    public BrushStroke(String ownerID, float[] color,  List<Point> points) {
+    public BrushStroke(String ownerID, float[] color,  List<float[]> points) {
         this.OwnerID = ownerID;
         this.color = color;
         this.points = points;
@@ -31,7 +31,7 @@ public class BrushStroke {
         return color;
     }
 
-    public List<Point> getPoints() {
+    public List<float[]> getPoints() {
         return points;
     }
 }

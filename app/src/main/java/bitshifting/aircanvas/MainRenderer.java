@@ -16,6 +16,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 
 import bitshifting.aircanvas.Graphics.Entities.Cube;
 import bitshifting.aircanvas.Graphics.Entities.PathManager;
+import bitshifting.aircanvas.Graphics.Managers.CanvasManager;
 import bitshifting.aircanvas.Graphics.Managers.ShaderManager;
 
 /**
@@ -51,6 +52,8 @@ public class MainRenderer implements CardboardView.StereoRenderer {
 
     PathManager pathManager;
 
+    CanvasManager canvasManager;
+
     float[] headView;
 
 
@@ -70,6 +73,7 @@ public class MainRenderer implements CardboardView.StereoRenderer {
             if(firstTime) {
                 //create new path due to first time
                 pathManager.setDrawing(startDrawing);
+                canvasManager.addBrushStroke(new float[]{1.0f, 0.0f, 0.0f});
                 firstTime = false;
             }
 
@@ -88,6 +92,8 @@ public class MainRenderer implements CardboardView.StereoRenderer {
                 for(int i = 0; i < forwardVec.length; i++) {
                     forwardVec[i] = forwardVec[i] * 5.0f;
                 }
+
+                canvasManager.addPointToStroke(forwardVec);
 
                 //multiply this by a certain direction and you have a vector
                 pathManager.update(forwardVec);
@@ -191,12 +197,13 @@ public class MainRenderer implements CardboardView.StereoRenderer {
     }
 
     //constructor
-    public MainRenderer(Context ctx, CardboardView cardboardView) {
+    public MainRenderer(Context ctx, CardboardView cardboardView, CanvasManager canvasManager) {
         context = ctx;
         shaderManager = ShaderManager.getInstance();
         shaderManager.setContext(ctx);
         viewMatrix = new float[16];
         camera = new float[16];
+        this.canvasManager = canvasManager;
 
         cameraRenderer = new CardboardCamera(cardboardView, ctx);
     }
