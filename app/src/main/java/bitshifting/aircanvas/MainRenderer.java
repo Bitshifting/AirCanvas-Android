@@ -75,12 +75,15 @@ public class MainRenderer implements CardboardView.StereoRenderer {
 
             count++;
 
-            if(count >= 60) {
+            if(count >= 1) {
                 //get the head transform
                 float[] forwardVec = new float[3];
                 headTransform.getForwardVector(forwardVec, 0);
 
-                Log.d("POSITION", "(" + forwardVec[0] + "," + forwardVec[1] + "," + forwardVec[2] + ")");
+                //forwardVec[1] *= -1.f;
+                forwardVec[0] *= -1.f;
+
+                //Log.d("POSITION", "(" + forwardVec[0] + "," + forwardVec[1] + "," + forwardVec[2] + ")");
 
                 for(int i = 0; i < forwardVec.length; i++) {
                     forwardVec[i] = forwardVec[i] * 5.0f;
@@ -102,7 +105,7 @@ public class MainRenderer implements CardboardView.StereoRenderer {
     public void onDrawEye(Eye eye) {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
-        //cameraRenderer.onDrawEye(eye);
+        cameraRenderer.onDrawEye(eye);
 
         projectionMatrix = eye.getPerspective(Z_NEAR, Z_FAR);
         Matrix.multiplyMM(viewMatrix, 0, eye.getEyeView(), 0, camera, 0);
