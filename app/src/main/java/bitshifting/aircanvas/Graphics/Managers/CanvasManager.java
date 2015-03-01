@@ -91,7 +91,10 @@ public class CanvasManager {
      * @param point
      */
     public void addPointToStroke(float[] point) {
-        int idx = canvas.getBrushStrokes().size();
+        if (currentStroke == null) {
+            return;
+        }
+        int idx = canvas.getBrushStrokes().size() - 1;
         canvas.getBrushStrokes().get(idx).getPoints().add(point);
         canvasRef.child("brushStrokes").child(currentStroke).push().setValue(point);
     }
