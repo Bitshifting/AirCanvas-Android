@@ -10,9 +10,12 @@ import com.google.vrtoolkit.cardboard.Eye;
 import com.google.vrtoolkit.cardboard.HeadTransform;
 import com.google.vrtoolkit.cardboard.Viewport;
 
+import java.util.Random;
+
 import javax.microedition.khronos.egl.EGLConfig;
 
 import bitshifting.aircanvas.Graphics.Entities.Cube;
+import bitshifting.aircanvas.Graphics.Entities.PathManager;
 import bitshifting.aircanvas.Graphics.Managers.ShaderManager;
 
 /**
@@ -46,12 +49,52 @@ public class MainRenderer implements CardboardView.StereoRenderer {
     //Camera renderer
     CardboardCamera cameraRenderer;
 
+    PathManager pathManager;
+
+    float[] headView;
+
+
+    //boolean to start and stop drawing
+    boolean startDrawing;
+    boolean firstTime;
+    int count;
+
     //called every frame (update)
     @Override
     public void onNewFrame(HeadTransform headTransform) {
         Matrix.setLookAtM(camera, 0, 0.0f, 0.0f, CAMERA_Z, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
         cameraRenderer.onNewFrame(headTransform);
+
+        if(startDrawing) {
+            if(firstTime) {
+                //create new path due to first time
+                pathManager.setDrawing(startDrawing);
+                firstTime = false;
+            }
+
+            count++;
+
+            if(count >= 60) {
+                //get the head transform
+                float[] forwardVec = new float[3];
+                headTransform.getForwardVector(forwardVec, 0);
+
+                Log.d("POSITION", "(" + forwardVec[0] + "," + forwardVec[1] + "," + forwardVec[2] + ")");
+
+                for(int i = 0; i < forwardVec.length; i++) {
+                    forwardVec[i] = forwardVec[i] * 5.0f;
+                }
+
+                //multiply this by a certain direction and you have a vector
+                pathManager.update(forwardVec);
+                count = 0;
+            }
+        }
+        else {
+            count = 0;
+        }
+
     }
 
     //render function
@@ -59,18 +102,22 @@ public class MainRenderer implements CardboardView.StereoRenderer {
     public void onDrawEye(Eye eye) {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
-        cameraRenderer.onDrawEye(eye);
+        //cameraRenderer.onDrawEye(eye);
 
-//        projectionMatrix = eye.getPerspective(Z_NEAR, Z_FAR);
-//        Matrix.multiplyMM(viewMatrix, 0, eye.getEyeView(), 0, camera, 0);
-//        testCube.render(projectionMatrix, viewMatrix);
+        projectionMatrix = eye.getPerspective(Z_NEAR, Z_FAR);
+        Matrix.multiplyMM(viewMatrix, 0, eye.getEyeView(), 0, camera, 0);
+        testCube.render(projectionMatrix, viewMatrix);
 
+       pathManager.render(projectionMatrix, viewMatrix);
     }
 
     //called when button is pressed
     public void onCardboardTrigger() {
 
         cameraRenderer.onCardboardTrigger();
+        startDrawing = !startDrawing;
+
+        firstTime = true;
     }
 
 
@@ -114,13 +161,30 @@ public class MainRenderer implements CardboardView.StereoRenderer {
         float[] color = {1, 0, 0};
         testCube = new Cube(pos, color, 2.f, shaderManager.getShader("NoLight"));
 
+        float[] pathColor = new float[3];
+
+        //get a random color
+        Random rand = new Random();
+        for(int i = 0; i < pathColor.length; i++)
+        {
+            pathColor[i] = rand.nextFloat();
+        }
+
+        pathManager = new PathManager(pathColor);
+
         cameraRenderer.onSurfaceCreated(config);
+
+        //set drawing as false initially
+        startDrawing = false;
+
+        headView = new float[16];
 
     }
 
     private void loadShaders() {
         shaderManager.addShader(R.raw.nolightvert, R.raw.nolightfrag, "NoLight");
         shaderManager.addShader(R.raw.texturevert, R.raw.texturefrag, "Texture");
+        shaderManager.addShader(R.raw.nolighvbovert, R.raw.nolightvbofrag, "NoLightVBO");
     }
 
     //constructor

@@ -27,18 +27,19 @@ public class MainActivity extends CardboardActivity {
 
     private static final String TAG = "MainActivity";
 
-    private static String FBUrl = "https://aircanvasfb.firebaseapp.com";
+    private static String FBUrl = "https://poopersmcpop.firebaseio.com/Hello";
 
     private String UserID;
 
     //set renderer to the main renderer class
     MainRenderer renderer;
-    Firebase firebase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Firebase.setAndroidContext(this.getApplicationContext());
 
         //get google cardboard
         CardboardView cardboardView = (CardboardView) findViewById(R.id.cardboard_view);
@@ -47,12 +48,16 @@ public class MainActivity extends CardboardActivity {
         renderer = new MainRenderer(getApplicationContext(), cardboardView);
         cardboardView.setRenderer(renderer);
         setCardboardView(cardboardView);
-        Firebase.setAndroidContext(this);
-        firebase = new Firebase(FBUrl);
+
+
 
         UserID = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        testFireBase();
+
+
+        //testFireBase(firebase);
+
+
     }
 
     //called when button is pressed
@@ -94,7 +99,7 @@ public class MainActivity extends CardboardActivity {
         return false;
     }
 
-    private void setUpListener() {
+    private void setUpListener(final Firebase firebase) {
         // set up event listener
         firebase.getRoot().child("message").addValueEventListener(new ValueEventListener() {
             @Override
@@ -110,6 +115,19 @@ public class MainActivity extends CardboardActivity {
             @Override
             public void onCancelled(FirebaseError firebaseError) {
                 Toast.makeText(getApplicationContext(), "Firebase Error.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        firebase.child("Hello").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Toast.makeText(getApplicationContext(), "Firebase data! - ", Toast.LENGTH_LONG);
+                firebase.push();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Toast.makeText(getApplicationContext(), "Firebase fail!", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -136,7 +154,8 @@ public class MainActivity extends CardboardActivity {
         canvas.addBrushStroke(stroke2);
     }
 
-    private void testFireBase() {
-        firebase.child("message").setValue("Test Message");
+    private void testFireBase(Firebase firebase) {
+        setUpListener(firebase);
+        firebase.child("Hello").setValue("WHAT'S UP");
     }
 }
