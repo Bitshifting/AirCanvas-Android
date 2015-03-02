@@ -94,7 +94,7 @@ public class MainRenderer implements CardboardView.StereoRenderer, Camera.Previe
                 pathManager.setDrawing(currentColor);
                 firstTime = false;
 
-                canvasManager.addBrushStroke(currentColor);
+                //canvasManager.addBrushStroke(currentColor);
             }
 
             count++;
@@ -111,7 +111,7 @@ public class MainRenderer implements CardboardView.StereoRenderer, Camera.Previe
                     forwardVec[i] = forwardVec[i] * 5.0f;
                 }
 
-                canvasManager.addPointToStroke(forwardVec);
+                //canvasManager.addPointToStroke(forwardVec);
 
                 //multiply this by a certain direction and you have a vector
                 pathManager.update(forwardVec);
@@ -137,9 +137,11 @@ public class MainRenderer implements CardboardView.StereoRenderer, Camera.Previe
 
        pathManager.render(projectionMatrix, viewMatrix);
 
-       for(PathManager pm : otherPathManagers.values()) {
-           pm.render(projectionMatrix, viewMatrix);
-       }
+//       for(PathManager pm : otherPathManagers.values()) {
+//           pm.render(projectionMatrix, viewMatrix);
+//       }
+
+        CanvasManager.pathManager.render(projectionMatrix, viewMatrix);
 
     }
 
@@ -148,6 +150,11 @@ public class MainRenderer implements CardboardView.StereoRenderer, Camera.Previe
 
         cameraRenderer.onCardboardTrigger();
         startDrawing = !startDrawing;
+
+        if(startDrawing == false) {
+            //get the whole thing and send
+            canvasManager.sendPath(pathManager.listOfPaths.get("" + (pathManager.currInd - 1)));
+        }
 
         firstTime = true;
     }

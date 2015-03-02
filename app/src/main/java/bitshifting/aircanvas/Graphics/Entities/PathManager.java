@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import bitshifting.aircanvas.Graphics.Managers.ShaderManager;
 
@@ -12,7 +14,8 @@ import bitshifting.aircanvas.Graphics.Managers.ShaderManager;
  */
 public class PathManager {
     public HashMap<String, Path> listOfPaths;
-    int currInd;
+    public int currInd;
+    public final Lock lock = new ReentrantLock();
 
     Path lastPath;
 
@@ -22,8 +25,10 @@ public class PathManager {
     }
 
     public void render(float[] projectionMatrix, float[] viewMatrix) {
-        for(int i = 0; i < listOfPaths.size(); i++) {
-            listOfPaths.get("" + i).render(projectionMatrix, viewMatrix);
+        for(String keys : listOfPaths.keySet()) {
+            lock.lock();
+            listOfPaths.get(keys).render(projectionMatrix, viewMatrix);
+            lock.unlock();
         }
 
     }

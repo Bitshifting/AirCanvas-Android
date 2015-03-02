@@ -5,6 +5,8 @@ import android.opengl.GLES30;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import bitshifting.aircanvas.MainRenderer;
 
@@ -29,6 +31,8 @@ public class Path {
 
     int[] vertexBuffer;
 
+    public List<float[]> points;
+
     public Path(float[] color, int shader) {
         this.color = color;
 
@@ -38,6 +42,8 @@ public class Path {
         viewID = 2;
         projectionID = 1;
         colorID = 0;
+
+        points = new Array`List<>();
 
 
         //get parameters from shader
@@ -91,6 +97,8 @@ public class Path {
     }
 
     public void update(float[] newPos) {
+
+        points.add(newPos);
         //subbuffer data
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, vertexBuffer[0]);
 

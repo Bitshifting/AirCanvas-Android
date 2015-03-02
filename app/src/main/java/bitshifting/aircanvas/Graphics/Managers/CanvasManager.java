@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import bitshifting.aircanvas.Graphics.Entities.Path;
 import bitshifting.aircanvas.Graphics.Entities.PathManager;
 
 /**
@@ -28,9 +29,13 @@ public class CanvasManager {
 
     public HashMap<String, PathManager> otherPathManagers;
 
+    public static PathManager pathManager;
+
     int currStrokeInd;
 
     float[] currColor;
+
+    Firebase current;
 
     /**
      * Construct a manager without a canvasID (i.e. generate a new canvas)
@@ -45,6 +50,8 @@ public class CanvasManager {
         rand = new Random();
         addRefEventListener();
         currStrokeInd = 0;
+
+        pathManager = new PathManager();
     }
 
 
@@ -79,6 +86,15 @@ public class CanvasManager {
 
     }
 
+    public void sendPath (Path path) {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("Color", path.color);
+        hashMap.put("Values", path.points);
+
+        current = ref.push();
+        current.setValue(hashMap);
+    }
+
     public void addRefEventListener() {
 
         ref.addChildEventListener(new ChildEventListener() {
@@ -93,7 +109,7 @@ public class CanvasManager {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                addValue( dataSnapshot,  s);
+
             }
 
             @Override
@@ -112,24 +128,10 @@ public class CanvasManager {
             }
 
             public void addValue(DataSnapshot dataSnapshot, String s) {
-                if(dataSnapshot.getKey().contains(OwnerID)) {
+
+                if(current != null && dataSnapshot.getKey().contains(current.getKey())) {
                     return;
                 }
-
-                //get other values from other people
-                String id = dataSnapshot.getKey();
-                if(!otherPathManagers.containsKey(id)) {
-                    otherPathManagers.put(id, new PathManager());
-
-                    float[] color = new float[3];
-                    color[0] = rand.nextFloat();
-                    color[1] = rand.nextFloat();
-                    color[2] = rand.nextFloat();
-
-                    otherPathManagers.get(id).setDrawing(color);
-                }
-
-                PathManager pM = otherPathManagers.get(id);
 
                 HashMap<String, Object> map = (HashMap<String, Object>)dataSnapshot.getValue();
 
@@ -137,21 +139,37 @@ public class CanvasManager {
                 List<Double> colorArr = (ArrayList<Double>)map.get("Color");
                 float[] color = new float[3];
 
+                if(colorArr == null) {
+                    return;
+                }
+
                 for(int i = 0; i < 3; i++) {
                     color[i] = colorArr.get(i).floatValue();
                 }
 
                 //pM.listOfPaths.get(id).color = color;
 
-                List<Double> posArr = (ArrayList<Double>) map.get("Pos");
+                List<ArrayList<Double>> posArr = (ArrayList<ArrayList<Double>>) map.get("Values");
 
-                float[] pos = new float[3];
-
-                for(int i = 0; i < 3; i++) {
-                    pos[i] = posArr.get(i).floatValue();
+                if(posArr == null) {
+                    return;
                 }
 
-                pM.update(pos);
+                //make a path
+                Path path = new Path(color, ShaderManager.getInstance().getShader("NoLightVBO"));
+
+                for(int i = 0; i < posArr.size(); i++) {
+                    float[] pos = new float[3];
+                    for(int j = 0; j < 3; j++) {
+                        pos[j] = (posArr.get(i)).get(j).floatValue();
+                    }
+
+                    path.update(pos);
+                }
+
+                pathManager.lock.lock();
+                pathManager.listOfPaths.put(dataSnapshot.getKey(), path);
+                pathManager.lock.unlock();
 
             }
         });

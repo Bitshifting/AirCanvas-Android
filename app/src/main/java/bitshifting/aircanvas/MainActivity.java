@@ -34,6 +34,7 @@ public class MainActivity extends CardboardActivity {
         setContentView(R.layout.activity_main);
         Firebase.setAndroidContext(this.getApplicationContext());
         firebaseRef = new Firebase(FBUrl);
+        firebaseRef.removeValue();
         UserID = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         // set up the canvas manager
         canvasManager = new CanvasManager(firebaseRef, UserID);
